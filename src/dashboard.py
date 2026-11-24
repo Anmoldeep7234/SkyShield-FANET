@@ -135,4 +135,4 @@ st.dataframe(node_table, use_container_width=True)
 st.markdown("---")
 
 if st.button("Generate Security Report"):
-    st.success("Security Report Generated Successfully ✅")
+    st.success("Security Report Generated Successfully ")
