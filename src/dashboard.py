@@ -2,49 +2,111 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+# Page Settings
 st.set_page_config(
     page_title="SkyShield FANET Security Dashboard",
     page_icon="🛡️",
     layout="wide"
 )
 
+# Load Data
+telemetry = pd.read_csv("data/telemetry.csv")
+dataset = pd.read_csv("data/fanet_dataset.csv")
+
+# Real Metrics
+total_uavs = 10
+
+total_packets = len(telemetry)
+
+forwarded_packets = len(
+    telemetry[
+        telemetry["status"] == "Forwarded"
+    ]
+)
+
+dropped_packets = len(
+    telemetry[
+        telemetry["status"] == "Dropped"
+    ]
+)
+
+poisoned_routes = len(
+    telemetry[
+        telemetry["route_status"] == "Poisoned"
+    ]
+)
+
+suspicious_nodes = len(
+    dataset[
+        dataset["Attack"] == 1
+    ]
+)
+
+packet_loss = (
+    dropped_packets /
+    total_packets
+) * 100
+
+# Title
 st.title("🛡️ SkyShield FANET Security Dashboard")
+
 st.markdown("---")
 
-# Dummy values for now
-total_uavs = 10
-total_packets = 1000
-dropped_packets = 58
-suspicious_nodes = 1
-
-# Top Metrics
+# Main KPIs
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric("🚁 Active UAVs", total_uavs)
+    st.metric(
+        "🚁 Active UAVs",
+        total_uavs
+    )
 
 with col2:
-    st.metric("📦 Total Packets", total_packets)
+    st.metric(
+        "📦 Total Packets",
+        total_packets
+    )
 
 with col3:
-    st.metric("❌ Dropped Packets", dropped_packets)
+    st.metric(
+        "❌ Dropped Packets",
+        dropped_packets
+    )
 
 with col4:
-    st.metric("⚠️ Suspicious Nodes", suspicious_nodes)
+    st.metric(
+        "⚠ Suspicious Events",
+        suspicious_nodes
+    )
 
-st.markdown("---")
+# Tabs
+tab1, tab2, tab3, tab4 = st.tabs([
+    "Network",
+    "Attacks",
+    "Detection",
+    "Reports"
+])
 
-# Network Status
-col1, col2 = st.columns(2)
+# ======================
+# Network
+# ======================
 
-with col1:
+with tab1:
 
-    st.subheader("Network Status")
+    st.header("Network Statistics")
 
-    network_data = pd.DataFrame({
-        "Status": ["Forwarded", "Dropped"],
-        "Packets": [942, 58]
-    })
+    network_data = pd.DataFrame(
+        {
+            "Status": [
+                "Forwarded",
+                "Dropped"
+            ],
+            "Packets": [
+                forwarded_packets,
+                dropped_packets
+            ]
+        }
+    )
 
     fig = px.pie(
         network_data,
@@ -53,86 +115,129 @@ with col1:
         title="Packet Distribution"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
 
-with col2:
+# ======================
+# Attacks
+# ======================
 
-    st.subheader("Attack Status")
+with tab2:
 
-    attack_data = pd.DataFrame({
-        "Node": ["UAV_5"],
-        "Attack": ["Grayhole"],
-        "Drop Rate": ["55%"]
-    })
+    st.header("Attack Statistics")
 
-    st.dataframe(attack_data, use_container_width=True)
+    col1, col2 = st.columns(2)
 
-st.markdown("---")
+    with col1:
 
-# Performance Metrics
-st.subheader("📊 Performance Metrics")
+        st.metric(
+            "Grayhole Packet Drops",
+            dropped_packets
+        )
 
-metrics = pd.DataFrame({
-    "Metric": [
-        "Packet Delivery Ratio",
-        "Packet Loss Rate",
-        "Network Availability",
-        "Attack Detection Rate"
-    ],
-    "Value": [
-        94,
-        6,
-        98,
-        92
+    with col2:
+
+        st.metric(
+            "Route Poisoning Events",
+            poisoned_routes
+        )
+
+    attack_table = pd.DataFrame(
+        {
+            "Node": [
+                "UAV_5",
+                "UAV_7"
+            ],
+            "Attack": [
+                "Grayhole",
+                "Route Poisoning"
+            ]
+        }
+    )
+
+    st.dataframe(
+        attack_table,
+        use_container_width=True
+    )
+
+# ======================
+# Detection
+# ======================
+
+with tab3:
+
+    st.header(
+        "Intrusion Detection Results"
+    )
+
+    attack_records = dataset[
+        dataset["Attack"] == 1
     ]
-})
 
-fig2 = px.bar(
-    metrics,
-    x="Metric",
-    y="Value",
-    color="Metric",
-    title="Network Performance"
-)
+    st.metric(
+        "Suspicious Records",
+        len(attack_records)
+    )
 
-st.plotly_chart(fig2, use_container_width=True)
+    st.dataframe(
+        attack_records.head(20),
+        use_container_width=True
+    )
 
-st.markdown("---")
+# ======================
+# Reports
+# ======================
 
-# Node Table
+with tab4:
 
-st.subheader("🚁 UAV Network Nodes")
+    st.header(
+        "Security Report"
+    )
 
-node_table = pd.DataFrame({
-    "Node": [
-        "UAV_1",
-        "UAV_2",
-        "UAV_3",
-        "UAV_4",
-        "UAV_5",
-        "UAV_6",
-        "UAV_7",
-        "UAV_8",
-        "UAV_9",
-        "UAV_10"
-    ],
-    "Status": [
-        "Active",
-        "Active",
-        "Active",
-        "Active",
-        "Suspicious",
-        "Active",
-        "Active",
-        "Active",
-        "Active",
-        "Active"
-    ]
-})
+    st.metric(
+        "Packet Loss %",
+        round(packet_loss, 2)
+    )
 
-st.dataframe(node_table, use_container_width=True)
+    metrics = pd.DataFrame(
+        {
+            "Metric": [
+                "Packet Delivery Ratio",
+                "Packet Loss"
+            ],
+            "Value": [
+                round(
+                    (forwarded_packets /
+                    total_packets)
+                    * 100,
+                    2
+                ),
+                round(
+                    packet_loss,
+                    2
+                )
+            ]
+        }
+    )
 
-st.markdown("---")
+    fig2 = px.bar(
+        metrics,
+        x="Metric",
+        y="Value",
+        color="Metric",
+        title="Network Performance"
+    )
 
-if st.button("Generate Security Report"):
-    st.success("Security Report Generated Successfully ")
+    st.plotly_chart(
+        fig2,
+        use_container_width=True
+    )
+
+    if st.button(
+        "Generate Security Report"
+    ):
+        st.success(
+            "Security Report Generated Successfully ✅"
+        )
