@@ -1,0 +1,5 @@
+Metric,Before_Attack,During_Attack,After_Isolation
+Packet Delivery Ratio,98.0,93.9,97.0
+Packet Loss,2.0,6.1,3.0
+Average Delay,2.5,10.4,3.2
+Average Hop Count,2.0,3.0,2.0
