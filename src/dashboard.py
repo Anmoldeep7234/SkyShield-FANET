@@ -21,6 +21,9 @@ quarantine = pd.read_csv(
 benchmark = pd.read_csv(
     "reports/benchmark_results.csv"
 )
+security_report = pd.read_csv(
+    "data/security_report.csv"
+)
 
 # Page Settings
 st.set_page_config(
@@ -119,13 +122,14 @@ with col5:
     )
     
 # Tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "Network",
     "Attacks",
     "Detection",
     "Reports",
     "Benchmarks",
-    "Quarantine"
+    "Quarantine",
+    "Final Report"
 ])
 
 # ======================
@@ -336,6 +340,74 @@ with tab6:
         "Nodes Isolated",
         len(quarantine)
     )
+
+with tab7:
+
+    st.header(
+        "Final Security Report"
+    )
+    
+    st.subheader(
+    "Detected Threats"
+    )
+
+    st.dataframe(security_report,use_container_width=True)
+    
+    st.metric(
+        "Total Packets",
+        total_packets
+    )
+
+    st.metric(
+        "Detected Attacks",
+        detected_attacks
+    )
+
+    st.metric(
+        "Dropped Packets",
+        dropped_packets
+    )
+
+    st.metric(
+        "Nodes Isolated",
+        len(quarantine)
+    )
+
+    st.metric(
+        "Security Score",
+        round(
+            security_score,
+            2
+        )
+    )
+    st.subheader(
+    "Benchmark Summary"
+    )
+
+    st.dataframe(
+    benchmark,
+    use_container_width=True
+    )
+    
+    st.progress(
+        int(security_score)
+    )
+    st.write(
+        f"Current Security Score: {round(security_score,2)}%"
+    )
+        
+    with open(
+    "data/security_report.csv",
+    "rb"
+    ) as file:
+
+        st.download_button(
+        label="⬇ Download Security Report",
+        data=file,
+        file_name="security_report.csv",
+        mime="text/csv"
+    )
+  
 
 if st.button(
         "Generate Security Report"
