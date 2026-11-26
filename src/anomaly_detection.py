@@ -1,5 +1,4 @@
-import pandas as pd
-
+import pandas as pd 
 from sklearn.ensemble import IsolationForest
 
 def detect_attack():
@@ -31,18 +30,19 @@ def detect_attack():
         df["Prediction"] == -1
     ]
 
+    anomalies.to_csv(
+        "data/detected_attacks.csv",
+        index=False
+    )
+
     print(
-        "\nSuspicious Records Found:",
+        "Detected Records:",
         len(anomalies)
     )
 
     return anomalies
 
-
 if __name__ == "__main__":
-
-    anomalies = detect_attack()
-
-    print(anomalies.head())
+    detect_attack()
 
     
