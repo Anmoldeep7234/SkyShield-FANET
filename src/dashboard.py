@@ -2,6 +2,26 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+telemetry = pd.read_csv(
+    "data/telemetry.csv"
+)
+
+dataset = pd.read_csv(
+    "data/fanet_dataset.csv"
+)
+
+detected = pd.read_csv(
+    "data/detected_attacks.csv"
+)
+
+quarantine = pd.read_csv(
+    "data/quarantine_nodes.csv"
+)
+
+benchmark = pd.read_csv(
+    "reports/benchmark_results.csv"
+)
+
 # Page Settings
 st.set_page_config(
     page_title="SkyShield FANET Security Dashboard",
@@ -47,13 +67,22 @@ packet_loss = (
     total_packets
 ) * 100
 
+detected_attacks = len(
+    detected
+)
+
+security_score = (
+    forwarded_packets /
+    total_packets
+) * 100
+
 # Title
 st.title("🛡️ SkyShield FANET Security Dashboard")
 
 st.markdown("---")
 
 # Main KPIs
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
     st.metric(
@@ -79,12 +108,24 @@ with col4:
         suspicious_nodes
     )
 
+with col5:
+
+    st.metric(
+        "🛡 Security Score",
+        round(
+            security_score,
+            2
+        )
+    )
+    
 # Tabs
-tab1, tab2, tab3, tab4 = st.tabs([
-    "Network",
-    "Attacks",
-    "Detection",
-    "Reports"
+st.tabs([
+"Network",
+"Attacks",
+"Detection",
+"Reports",
+"Benchmarks",
+"Quarantine"
 ])
 
 # ======================
@@ -171,6 +212,11 @@ with tab3:
     st.header(
         "Intrusion Detection Results"
     )
+    
+    st.metric(
+    "Detected Attacks",
+    detected_attacks
+)
 
     attack_records = dataset[
         dataset["Attack"] == 1
@@ -186,6 +232,15 @@ with tab3:
         use_container_width=True
     )
 
+    st.subheader(
+        "Isolation Forest Results"
+    )
+
+    st.dataframe(
+        detected.head(20),
+        use_container_width=True
+    )
+    
 # ======================
 # Reports
 # ======================
@@ -199,6 +254,14 @@ with tab4:
     st.metric(
         "Packet Loss %",
         round(packet_loss, 2)
+    )
+    
+    st.metric(
+    "Security Score",
+    round(
+        security_score,
+        2
+    )
     )
 
     metrics = pd.DataFrame(
@@ -234,6 +297,50 @@ with tab4:
         fig2,
         use_container_width=True
     )
+
+    with tab5:
+
+        st.header(
+            "Benchmark Results"
+        )
+
+        st.dataframe(
+            benchmark,
+            use_container_width=True
+        )
+        
+        fig3 = px.bar(
+        benchmark,
+        x="Metric",
+        y=[
+            "Before_Attack",
+            "During_Attack",
+            "After_Isolation"
+        ],
+        barmode="group",
+        title="Network Performance Comparison"
+        )
+
+        st.plotly_chart(
+            fig3,
+            use_container_width=True
+        )
+
+    with tab6:
+
+        st.header(
+            "Quarantined UAV Nodes"
+        )
+
+        st.dataframe(
+            quarantine,
+            use_container_width=True
+        )
+
+        st.metric(
+            "Nodes Isolated",
+            len(quarantine)
+        )
 
     if st.button(
         "Generate Security Report"
