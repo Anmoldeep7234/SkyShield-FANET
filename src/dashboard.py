@@ -119,13 +119,13 @@ with col5:
     )
     
 # Tabs
-st.tabs([
-"Network",
-"Attacks",
-"Detection",
-"Reports",
-"Benchmarks",
-"Quarantine"
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "Network",
+    "Attacks",
+    "Detection",
+    "Reports",
+    "Benchmarks",
+    "Quarantine"
 ])
 
 # ======================
@@ -248,8 +248,7 @@ with tab3:
 with tab4:
 
     st.header(
-        "Security Report"
-    )
+        "Security Report")
 
     st.metric(
         "Packet Loss %",
@@ -258,10 +257,7 @@ with tab4:
     
     st.metric(
     "Security Score",
-    round(
-        security_score,
-        2
-    )
+    round(security_score,2)
     )
 
     metrics = pd.DataFrame(
@@ -298,18 +294,16 @@ with tab4:
         use_container_width=True
     )
 
-    with tab5:
+with tab5:
 
-        st.header(
-            "Benchmark Results"
-        )
+    st.header("Benchmark Results")
 
-        st.dataframe(
-            benchmark,
-            use_container_width=True
-        )
-        
-        fig3 = px.bar(
+    st.dataframe(
+        benchmark,
+        use_container_width=True
+    )
+
+    fig3 = px.bar(
         benchmark,
         x="Metric",
         y=[
@@ -319,32 +313,33 @@ with tab4:
         ],
         barmode="group",
         title="Network Performance Comparison"
-        )
+    )
 
-        st.plotly_chart(
-            fig3,
-            use_container_width=True
-        )
+    st.plotly_chart(
+        fig3,
+        use_container_width=True
+    )
 
-    with tab6:
 
-        st.header(
-            "Quarantined UAV Nodes"
-        )
+with tab6:
 
-        st.dataframe(
-            quarantine,
-            use_container_width=True
-        )
+    st.header(
+        "Quarantined UAV Nodes"
+    )
 
-        st.metric(
-            "Nodes Isolated",
-            len(quarantine)
-        )
+    st.dataframe(
+        quarantine,
+        use_container_width=True
+    )
 
-    if st.button(
+    st.metric(
+        "Nodes Isolated",
+        len(quarantine)
+    )
+
+if st.button(
         "Generate Security Report"
     ):
-        st.success(
+    st.success(
             "Security Report Generated Successfully ✅"
         )
